@@ -77,12 +77,19 @@ Definition shift (argv : list LString.t) : C.t System.effect unit :=
 (*   end. *)
 (* Compute foo "b" "a b". *)
 
-Fixpoint replace (str : string) : string:=
+Fixpoint replace (str : string) : string :=
   match str with
     | String "-" s => String " " (replace s)
-    | EmptyString       => EmptyString
-    | String c s        => String c (replace s)
+    | String c s   => String c (replace s)
+    | EmptyString  => EmptyString
   end.
+
+Definition drop_dir (path : string) : string :=
+  (fix drop path file :=  match path with
+                           | String "/" s => drop s s
+                           | String c s   => drop s file
+                           | EmptyString  => file
+                         end) path path.
 
 Fixpoint combi (argv : list LString.t) : C.t System.effect unit :=
   match argv with
@@ -96,7 +103,7 @@ Fixpoint combi (argv : list LString.t) : C.t System.effect unit :=
                         | None         =>
                           System.log (LString.s "Cannot read the file.")
                         | Some content =>
-                          let name' := replace (LString.to_string name) in
+                          let name' := drop_dir (replace (LString.to_string name)) in
                           let title := substring 0 ((length name')-3) name' in
                           let! _ := System.log (LString.s "# " ++ LString.s title) in
                           System.log (map_line (inc 1) content)
