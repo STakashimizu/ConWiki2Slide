@@ -66,7 +66,7 @@ Definition shift (argv : list LString.t) : C.t System.effect unit :=
         | None   => System.log (LString.s "Wrong number spec.")
       end
     end
-  | _                   => System.log (LString.s "Expected two parameter.")
+  | _                   => System.log (LString.s "Exact 2 parameters expected.")
   end.
 
 (* Definition foo (arg : ascii) (s:string) : bool := *)
@@ -80,14 +80,14 @@ Definition shift (argv : list LString.t) : C.t System.effect unit :=
 Fixpoint replace (str : string) : string :=
   match str with
     | String "-" s => String " " (replace s)
-    | String c s   => String c (replace s)
+    | String c   s => String c   (replace s)
     | EmptyString  => EmptyString
   end.
 
 Definition drop_dir (path : string) : string :=
   (fix drop path file :=  match path with
                            | String "/" s => drop s s
-                           | String c s   => drop s file
+                           | String c   s => drop s file
                            | EmptyString  => file
                          end) path path.
 
@@ -110,7 +110,7 @@ Fixpoint combi (argv : list LString.t) : C.t System.effect unit :=
                       end in
              combi' names
          end) file_names
-    | _                  => System.log (LString.s "Expected one parameter.")
+    | _                  => System.log (LString.s "Only 1 parameter expected.")
   end.
 
 Definition main := Extraction.launch combi.
